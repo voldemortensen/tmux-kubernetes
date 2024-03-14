@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "$CURRENT_DIR/helpers.sh"
-
 get_tmux_option() {
 	local option="$1"
 	local default_value="$2"
