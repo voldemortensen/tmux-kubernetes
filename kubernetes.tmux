@@ -1,27 +1,42 @@
 #!/usr/bin/env bash
 
-get_option() {
-  local option=$(tmux show-option -gqv "$1")
-  [ -z $option ] && echo $2 || echo $option
+CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+kubnernetes_interpolations=(
+    "\#{kubernetes_context}"
+    "\#{kubernetes_namespace}"
+    "\#{kubernetes_cluster}"
+)
+
+kubernetes_commands=(
+    "#()/context.sh"
+    "#()/namespace.sh"
+    "#()/cluster.sh"
+)
+
+set_tmux_option() {
+	local option="$1"
+	local value="$2"
+	tmux set-option -gq "$option" "$value"
 }
 
-kubernetes_context() {
-    kubernetes_context_bg=$(get_option "@kubernetes-context-bg" "colour0")
-    kubernetes_context_fg=$(get_option "@kubernetes-context-fg" "colour7")
-    kubernetes_context=$(kubectl config current-context)
-    echo "#[fg=$kubernetes_context_fg,bg=$kubernetes_context_bg]$kubernetes_context"
+do_interpolation() {
+	local all_interpolated="$1"
+	for ((i=0; i<${#kubernetes_commands[@]}; i++)); do
+		all_interpolated=${all_interpolated//${kubernetes_interpolation[$i]}/${kubernetes_commands[$i]}}
+	done
+	echo "$all_interpolated"
 }
 
-kubernetes_namespace() {
-    kubernetes_namespace_bg=$(get_option "@kubernetes-namespace-bg" "colour0")
-    kubernetes_namespace_fg=$(get_option "@kubernetes-namespace-fg" "colour7")
-    kubernetes_namespace=$(kubectl config view --minify --output 'jsonpath={..namespace}')
-    echo -n "#[fg=$kubernetes_namespace_fg,bg=$kubernetes_namespace_bg]$kubernetes_namespace"
+update_tmux_option() {
+	local option="$1"
+	local option_value="$(get_tmux_option "$option")"
+	local new_option_value="$(do_interpolation "$option_value")"
+	set_tmux_option "$option" "$new_option_value"
 }
 
-kubernetes_cluster() {
-    kubernetes_cluster_bg=$(get_option "@kubernetes-cluster-bg" "colour0")
-    kubernetes_cluster_fg=$(get_option "@kubernetes-cluster-fg" "colour7")
-    kubernetes_cluster=$(kubectl config view --minify --output 'jsonpath={..clusters[].name}')
-    echo -n "#[fg=$kubernetes_cluster_fg,bg=$kubernetes_cluster_bg]$kubernetes_cluster"
+main() {
+	update_tmux_option "status-right"
+	update_tmux_option "status-left"
 }
+main
