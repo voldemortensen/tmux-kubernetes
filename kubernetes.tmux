@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$CURRENT_DIR/helpers.sh"
 
 kubnernetes_interpolations=(
     "\#{kubernetes_context}"
@@ -9,9 +10,9 @@ kubnernetes_interpolations=(
 )
 
 kubernetes_commands=(
-    "#()/context.sh"
-    "#()/namespace.sh"
-    "#()/cluster.sh"
+    "#(CURRENT_DIR/context.sh)"
+    "#(CURRENT_DIR/namespace.sh)"
+    "#(CURRENT_DIR/cluster.sh)"
 )
 
 set_tmux_option() {
