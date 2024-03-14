@@ -3,7 +3,7 @@
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$CURRENT_DIR/helpers.sh"
 
-kubnernetes_interpolations=(
+kubernetes_interpolations=(
     "\#{kubernetes_context}"
     "\#{kubernetes_namespace}"
     "\#{kubernetes_cluster}"
